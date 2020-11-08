@@ -194,6 +194,51 @@ export async function main() {
         },
     }
 
+    function observeMutation() {
+        const cb = (mutations: MutationRecord[]) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    console.log('TEST: Checking highlights are anchored')
+                    rerenderExistingHighlightsIfNeeded()
+                } else {
+                    console.log('TEST: unknown mutation type:', mutation)
+                }
+            }
+        }
+
+        const obs = new MutationObserver(cb)
+
+        obs.observe(document.body, { childList: true, subtree: true })
+
+        return () => obs.disconnect()
+    }
+
+    function rerenderExistingHighlightsIfNeeded() {
+        const annotIdsToHighlightEls = new Map<string, HTMLElement[]>()
+
+        for (const highlightEl of document.querySelectorAll<HTMLElement>(
+            'memex-highlight',
+        )) {
+            const { annotation: annotId } = highlightEl.dataset
+
+            const prev = annotIdsToHighlightEls.get(annotId) ?? []
+            annotIdsToHighlightEls.set(annotId, [...prev, highlightEl])
+        }
+
+        for (const cachedAnnot of annotationsCache.annotations.filter(
+            (annot) => annot.body?.length > 0,
+        )) {
+            if (annotIdsToHighlightEls.get(cachedAnnot.url) == null) {
+                console.log('TEST: re-rendering highlight:', cachedAnnot.body)
+                highlightRenderer.renderHighlight(cachedAnnot, () =>
+                    console.log('TEST: THIS DOESnT WORK YET'),
+                )
+            }
+        }
+    }
+
+    observeMutation()
+
     window['contentScriptRegistry'] = contentScriptRegistry
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,

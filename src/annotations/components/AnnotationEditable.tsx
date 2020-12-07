@@ -1,6 +1,9 @@
 import * as React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import ItemBoxBottom from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
+import * as icons from 'src/common-ui/components/design-library/icons'
 import niceTime from 'src/util/nice-time'
 import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 // import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
@@ -141,24 +144,6 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    private renderFooter() {
-        const {
-            annotationFooterDependencies,
-            annotationEditDependencies,
-            onGoToAnnotation,
-            ...props
-        } = this.props
-
-        return (
-            <AnnotationFooter
-                {...props}
-                {...annotationFooterDependencies}
-                isEdited={this.isEdited}
-                timestamp={this.getFormattedTimestamp()}
-            />
-        )
-    }
-
     private renderMainAnnotation() {
         const {
             mode,
@@ -204,20 +189,86 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private renderFooter() {
+        const {
+            annotationFooterDependencies,
+            annotationEditDependencies,
+            onGoToAnnotation,
+            ...props
+        } = this.props
+
+        return (
+            <AnnotationFooter
+                {...props}
+                {...annotationFooterDependencies}
+                isEdited={this.isEdited}
+                timestamp={this.getFormattedTimestamp()}
+            />
+        )
+    }
+
     render() {
+        const footerDeps = this.props.annotationFooterDependencies
+
         return (
             <ThemeProvider theme={this.theme}>
-                <AnnotationStyled
-                    id={this.props.url} // Focusing on annotation relies on this ID.
-                    ref={this.setBoxRef}
-                    onClick={this.handleGoToAnnotation}
-                >
-                    {this.renderHighlightBody()}
-                    {this.renderMainAnnotation()}
-                    {this.renderFooter()}
-                    {this.renderCopyPaster()}
-                    {this.renderShareMenu()}
-                </AnnotationStyled>
+                <StyledItemBox>
+                    <Annotation
+                        id={this.props.url} // Focusing on annotation relies on this ID.
+                        ref={this.setBoxRef}
+                        onClick={this.handleGoToAnnotation}
+                    >
+                        {this.renderHighlightBody()}
+                        {this.renderMainAnnotation()}
+                        {this.renderCopyPaster()}
+                        {this.renderShareMenu()}
+                        <ItemBoxBottom
+                            creationInfo={{
+                                createdWhen: new Date(
+                                    this.props.createdWhen,
+                                ).getTime(),
+                            }}
+                            actions={[
+                                {
+                                    image: this.props.isBookmarked
+                                        ? icons.heartFull
+                                        : icons.heartEmpty,
+                                    onClick: footerDeps.toggleBookmark,
+                                    key: 'bookmark-note-btn',
+                                },
+                                {
+                                    image: icons.copy,
+                                    key: 'copy-paste-note-btn',
+                                    onClick: footerDeps.onCopyPasterBtnClick,
+                                },
+                                {
+                                    image: icons.trash,
+                                    key: 'delete-note-btn',
+                                    onClick: footerDeps.onDeleteIconClick,
+                                },
+                                // TODO: implement tag thing
+                                // {
+                                //     image: this.props.tags?.length > 0 ? icons.tagFull : icons.tagEmpty,
+                                //     key: 'tag-note-btn',
+                                //     onClick: footerDeps.on
+                                // },
+                                // TODO: implement reply
+                                // {
+                                //     image: icons.commentAdd,
+                                //     key: 'reply-to-note-btn',
+                                //     onClick: footerDeps.onReplyBtnClick
+                                // }
+                                footerDeps.onGoToAnnotation
+                                    ? {
+                                          image: icons.goTo,
+                                          key: 'go-to-note-btn',
+                                          onClick: footerDeps.onGoToAnnotation,
+                                      }
+                                    : undefined,
+                            ]}
+                        />
+                    </Annotation>
+                </StyledItemBox>
             </ThemeProvider>
         )
     }
@@ -231,8 +282,6 @@ const CopyPasterWrapper = styled.div`
     left: 70px;
 `
 
-const HighlightTextStyled = styled.span``
-
 const HighlightStyled = styled.div`
     font-weight: 400;
     font-size: 14px;
@@ -244,37 +293,10 @@ const HighlightStyled = styled.div`
     line-break: normal;
 `
 
-const AnnotationStyled = styled.div`
-    border-radius: 3px;
-
-    color: rgb(54, 54, 46);
-
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
-    transition: background 120ms ease-in 0s;
-
-    &:hover {
-        transition: background 120ms ease-in 0s;
-        background-color: rgba(55, 53, 47, 0.03);
-    }
-
-    box-sizing: border-box;
-    width: 97%;
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
+const StyledItemBox = styled(ItemBox)`
     margin: 10px 0 5px 0;
-    cursor: pointer;
-    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
-    ${({ theme }) =>
-        theme.isActive &&
-        `
-        box-shadow: 0px 0px 5px 1px #00000080;
-    `}
-
-    cursor: ${({ theme }) => theme.cursor}
-
+    ${({ theme }) => theme.isActive && `box-shadow: 0px 0px 5px 1px #00000080;`}
     ${({ theme }) =>
         theme.isEditing &&
         `
@@ -285,4 +307,8 @@ const AnnotationStyled = styled.div`
             background-color: white;
         }
     `}
+`
+
+const Annotation = styled.div`
+    padding: 15px;
 `

@@ -16,8 +16,6 @@ export interface Props {
 
 /* tslint:disable-next-line variable-name */
 class AnnotationView extends React.Component<Props> {
-    private secretInputRef = React.createRef<HTMLInputElement>()
-
     private bindHandleTagPillClick: (tag: string) => React.MouseEventHandler = (
         tag,
     ) => (event) => {
@@ -99,7 +97,6 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 0 15px 10px 15px;
     line-height: 1.4;
     text-align: left;
 
@@ -109,7 +106,6 @@ const CommentBox = styled.div`
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
-        padding: 15px 15px 15px;
     `}
 `
 

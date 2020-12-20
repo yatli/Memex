@@ -1,5 +1,5 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import { Neo4jBackend } from '../neo4j'
 
 import { SocialSearchParams } from './types'
 import { Tweet, SocialPage, User } from 'src/social-integration/types'
@@ -13,13 +13,11 @@ import { derivePostUrlIdProps } from 'src/social-integration/util'
 import { FilteredIDsManager } from 'src/search/search/filters'
 import { FilteredIDs } from '..'
 
-export class SocialSearchPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class SocialSearchPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static SEARCH_OP_ID = 'memex:dexie.searchSocial'
     static MAP_POST_IDS_OP_ID = 'memex:dexie.mapIdsToSocialPages'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(
@@ -39,13 +37,12 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         }
 
         const ids = new Set<number>()
+        const result = await this.backend.readTransaction(`
+MATCH (l:SocialPostList {listId: ${lists[0]}})<-[*]-(:SocialPostListEntry)-[*]->(p:SocialPost)
+RETURN p.postId AS postId
+`)
 
-        await this.backend.dexieInstance
-            .table(LIST_ENTRIES_COLL)
-            .where('listId')
-            .equals(Number(lists[0]))
-            .each(({ postId }) => ids.add(postId))
-
+        result.records.forEach((r) => ids.add(r['postId']))
         return ids
     }
 
@@ -55,19 +52,23 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         }
 
         const ids = new Set<number>()
-        await this.backend.dexieInstance
-            .table('tags')
-            .where('name')
-            .anyOf(tags)
-            .eachPrimaryKey((pk) => {
-                const [, url] = pk as [void, string]
-                const { postId } = derivePostUrlIdProps({ url })
+        const result = await this.backend.readTransaction(
+            `
+MATCH (tag:Tag)-[*]->(p:Page)
+WHERE tag.name IN $$tagSet
+RETURN p.url AS url
+`,
+            { tagSet: tags },
+        )
 
-                if (postId) {
-                    ids.add(postId)
-                }
-            })
+        result.records.forEach((r) => {
+            let url = r['url']
+            const { postId } = derivePostUrlIdProps({ url })
 
+            if (postId) {
+                ids.add(postId)
+            }
+        })
         return ids
     }
 
@@ -77,12 +78,16 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         }
 
         const ids = new Set<number>()
-        await this.backend.dexieInstance
-            .table(TAGS_COLL)
-            .where('name')
-            .anyOf(tags)
-            .each(({ postId }) => ids.add(postId))
+        const result = await this.backend.readTransaction(
+            `
+MATCH (tag:SocialTag)-[*]->(p:SocialPost)
+WHERE tag.name IN $$tagSet
+RETURN p.postId AS postId
+`,
+            { tagSet: tags },
+        )
 
+        result.records.forEach((r) => ids.add(r['postId']))
         return ids as any
     }
 
@@ -92,14 +97,19 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         }
 
         const userIds = users.map((user) => user.id)
+        const result = await this.backend.readTransaction(
+            `
+MATCH (u:SocialUser)-[*]->(p:SocialPost)
+WHERE u.userId IN $$userIds
+RETURN p.postId AS postId
+`,
+            { userIds: userIds },
+        )
 
-        const postIds = (await this.backend.dexieInstance
-            .table(POSTS_COLL)
-            .where('userId')
-            .anyOf(userIds)
-            .primaryKeys()) as number[]
+        const ids = new Set<number>()
+        result.records.forEach((r) => ids.add(r['postId']))
 
-        return new Set([...postIds])
+        return ids
     }
 
     private async findFilteredPosts(params: SocialSearchParams) {
@@ -138,12 +148,16 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const socialPosts = new Map<number, SocialPage>()
 
         const results = new Map<number, SocialPage>()
+        const result = await this.backend.readTransaction(
+            `
+MATCH (p:SocialPost)
+WHERE p.postId IN $$postIds
+RETURN p.postId AS postId, p
+`,
+            { postIds: postIds },
+        )
 
-        await this.backend.dexieInstance
-            .table<Tweet>(POSTS_COLL)
-            .where('id')
-            .anyOf(postIds)
-            .each((post) => socialPosts.set(post.id, post))
+        result.records.forEach((r) => socialPosts.set(r['postId'], r['p']))
 
         postIds.map((id) => {
             const post = socialPosts.get(id)
@@ -162,10 +176,13 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         },
         { startDate, endDate }: SocialSearchParams,
     ): Promise<number[]> {
-        let coll = this.backend.dexieInstance
-            .table<Tweet>(POSTS_COLL)
-            .where(args.field)
-            .equals(args.term)
+        const result = await this.backend.readTransaction(`
+MATCH (p:SocialPost)
+WHERE p.${args.field} = '${args.term}'
+RETURN p AS tweet
+`)
+        let coll = new Array<Tweet>()
+        result.records.forEach((r) => coll.push(r['tweet'] as Tweet))
 
         if (startDate || endDate) {
             coll = coll.filter(

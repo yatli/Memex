@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Firefox WebExtension",
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "addonPath": "${workspaceFolder}/extension",
+            "profile": "MemexDebug",
+            "reloadOnChange": {
+                "watch": ["${workspaceFolder}/extension/*.js"]
+            },
+            "pathMappings": [
+                {
+                    "url": "webpack:///src",
+                    "path": "${workspaceFolder}/src"
+                },
+                {
+                    "url": "webpack:///external",
+                    "path": "${workspaceFolder}/external"
+                }
+            ],
+            "skipFiles": ["${workspaceFolder}/node_modules/**"]
+        }
+    ]
+}

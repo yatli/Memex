@@ -1,21 +1,19 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
 import AnnotsStorage from 'src/annotations/background/storage'
 import { Annotation } from 'src/annotations/types'
+import { Neo4jBackend } from '../neo4j'
 const moment = require('moment-timezone')
 
-export class AnnotationsListPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static TERMS_SEARCH_OP_ID = 'memex:dexie.searchAnnotations'
     static LIST_BY_PAGE_OP_ID = 'memex:dexie.listAnnotationsByPage'
     static LIST_BY_DAY_OP_ID = 'memex:dexie.listAnnotationsByDay'
     static DEF_INNER_LIMIT_MULTI = 2
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(

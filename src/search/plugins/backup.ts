@@ -1,10 +1,10 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import { Neo4jBackend } from '../neo4j'
 
-export class BackupPlugin extends StorageBackendPlugin<DexieStorageBackend> {
+export class BackupPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static QUEUE_CHANGES = 'memex:dexie.queueCollectionChanges'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(
@@ -35,7 +35,7 @@ export class BackupPlugin extends StorageBackendPlugin<DexieStorageBackend> {
                     .limit(chunkSize)
                     .primaryKeys()
 
-                const changes = pks.map(objectPk => ({
+                const changes = pks.map((objectPk) => ({
                     timestamp: pkIterator++,
                     operation: 'create',
                     collection,

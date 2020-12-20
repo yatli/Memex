@@ -1,15 +1,13 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import { Neo4jBackend } from '../neo4j'
 
 import { SearchParams, PageResultsMap, FilteredIDs } from '..'
 
-export class SearchLookbacksPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class SearchLookbacksPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static FROM_END_DATE_OP_ID = 'memex:dexie.lookbackFromEndDate'
     static BM_TIME_OP_ID = 'memex:dexie.lookbackBookmarksTime'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(
@@ -52,7 +50,7 @@ export class SearchLookbacksPlugin extends StorageBackendPlugin<
             // Stop iterating once we have enough
             .until(() => latestVisits.size >= skip + limit)
             // For each visit PK, reduce down into Map of URL keys to latest visit time
-            .eachPrimaryKey(key => {
+            .eachPrimaryKey((key) => {
                 const [time, url] = key as [number, string]
                 // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
                 if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
@@ -129,7 +127,7 @@ export class SearchLookbacksPlugin extends StorageBackendPlugin<
                             .equals(currentUrl)
                             .reverse()
                             .until(() => done)
-                            .eachPrimaryKey(key => {
+                            .eachPrimaryKey((key) => {
                                 const [visitTime] = key as [number]
                                 if (
                                     visitTime >= startDate &&

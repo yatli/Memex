@@ -1,19 +1,19 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { SuggestOptions, SuggestResult } from '../types'
 import { UnimplementedError, InvalidFindOptsError } from '../storage/errors'
 import { Tag, Page } from '../models'
 import { initErrHandler } from '../storage'
+import { Neo4jBackend } from '../neo4j'
 
 export type SuggestType = 'domain' | 'tag'
 
-export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
+export class SuggestPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static SUGGEST_OP_ID = 'memex:dexie.suggest'
     static SUGGEST_OBJS_OP_ID = 'memex:dexie.suggestObjects'
     static SUGGEST_EXT_OP_ID = 'memex:dexie.extendedSuggest'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(

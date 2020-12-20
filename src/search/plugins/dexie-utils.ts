@@ -1,5 +1,6 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import { Neo4jBackend } from '../neo4j'
 
 export interface RegexpQueryArgs {
     collection: string
@@ -16,16 +17,14 @@ export interface GetPksProps {
     reverse?: boolean
 }
 
-export class DexieUtilsPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class DexieUtilsPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static FIND_BY_PK_OP = 'memex:dexie.findByPk'
     static GET_PKS_OP = 'memex:dexie.getPks'
     static NUKE_DB_OP = 'memex:dexie.recreateDatabase'
     static REGEXP_COUNT_OP = 'memex:dexie.countByRegexp'
     static REGEXP_DELETE_OP = 'memex:dexie.deleteByRegexp'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(
@@ -59,7 +58,7 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
 
         return this.backend.dexieInstance
             .table(collection)
-            .filter(doc => re.test(doc[fieldName]))
+            .filter((doc) => re.test(doc[fieldName]))
     }
 
     getPks = ({

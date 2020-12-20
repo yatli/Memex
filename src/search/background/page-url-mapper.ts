@@ -1,5 +1,4 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
@@ -11,14 +10,13 @@ import {
     derivePostUrlIdProps,
     buildTweetUrl,
 } from 'src/social-integration/util'
+import { Neo4jBackend } from '../neo4j'
 
-export class PageUrlMapperPlugin extends StorageBackendPlugin<
-    DexieStorageBackend
-> {
+export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
     static MAP_OP_SOCIAL_ID = 'memex:dexie.mapUrlsToSocial'
 
-    install(backend: DexieStorageBackend) {
+    install(backend: Neo4jBackend) {
         super.install(backend)
 
         backend.registerOperation(

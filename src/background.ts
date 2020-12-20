@@ -38,6 +38,7 @@ export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
+
     initSentry({ storageChangesManager: localStorageChangesManager })
 
     const getServerStorage = createLazyServerStorage(

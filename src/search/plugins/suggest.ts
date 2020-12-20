@@ -39,30 +39,32 @@ export class SuggestPlugin extends StorageBackendPlugin<Neo4jBackend> {
         type: SuggestType
         limit?: number
     }) {
-        const db = this.backend.dexieInstance
-        const applyQuery = <T, Key>(where) =>
-            where
-                .startsWithIgnoreCase(query)
-                .limit(limit)
-                .uniqueKeys()
-                .catch(initErrHandler([] as T[]))
+        // TODO neo4j
+        return []
+        //        const db = this.backend.dexieInstance
+        //const applyQuery = <T, Key>(where) =>
+        //where
+        //.startsWithIgnoreCase(query)
+        //.limit(limit)
+        //.uniqueKeys()
+        //.catch(initErrHandler([] as T[]))
 
-        switch (type) {
-            case 'domain': {
-                const domains = await applyQuery<Page, string>(
-                    db.table('pages').where('domain'),
-                )
-                const hostnames = await applyQuery<Page, string>(
-                    db.table('pages').where('hostname'),
-                )
-                return [...new Set([...domains, ...hostnames])]
-            }
-            case 'tag':
-            default:
-                return applyQuery<Tag, [string, string]>(
-                    db.table('tags').where('name'),
-                )
-        }
+        //switch (type) {
+        //case 'domain': {
+        //const domains = await applyQuery<Page, string>(
+        //db.table('pages').where('domain'),
+        //)
+        //const hostnames = await applyQuery<Page, string>(
+        //db.table('pages').where('hostname'),
+        //)
+        //return [...new Set([...domains, ...hostnames])]
+        //}
+        //case 'tag':
+        //default:
+        //return applyQuery<Tag, [string, string]>(
+        //db.table('tags').where('name'),
+        //)
+        //}
     }
 
     async suggestObjects<S, P = any>({
@@ -74,54 +76,55 @@ export class SuggestPlugin extends StorageBackendPlugin<Neo4jBackend> {
         query: any
         options?: SuggestOptions
     }) {
-        const db = this.backend.dexieInstance
-        // Grab first entry from the filter query; ignore rest for now
-        const [[indexName, value], ...fields] = Object.entries<string>(query)
+        return []
+        //        const db = this.backend.dexieInstance
+        //// Grab first entry from the filter query; ignore rest for now
+        //const [[indexName, value], ...fields] = Object.entries<string>(query)
 
-        if (fields.length > 1) {
-            throw new UnimplementedError(
-                '`suggestObjects` only supports querying a single field.',
-            )
-        }
+        //if (fields.length > 1) {
+        //throw new UnimplementedError(
+        //'`suggestObjects` only supports querying a single field.',
+        //)
+        //}
 
-        const whereClause = db.table<S, P>(collection).where(indexName)
+        //const whereClause = db.table<S, P>(collection).where(indexName)
 
-        let coll =
-            options.ignoreCase &&
-            options.ignoreCase.length &&
-            options.ignoreCase[0] === indexName
-                ? whereClause.startsWithIgnoreCase(value)
-                : whereClause.startsWith(value)
+        //let coll =
+        //options.ignoreCase &&
+        //options.ignoreCase.length &&
+        //options.ignoreCase[0] === indexName
+        //? whereClause.startsWithIgnoreCase(value)
+        //: whereClause.startsWith(value)
 
-        if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
-            throw new InvalidFindOptsError(
-                `Specified ignoreCase field '${options.ignoreCase[0]}' is not in filter query`,
-            )
-        }
+        //if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
+        //throw new InvalidFindOptsError(
+        //`Specified ignoreCase field '${options.ignoreCase[0]}' is not in filter query`,
+        //)
+        //}
 
-        coll = coll.limit(options.limit || 10)
+        //coll = coll.limit(options.limit || 10)
 
-        if (options.reverse) {
-            coll = coll.reverse()
-        }
+        //if (options.reverse) {
+        //coll = coll.reverse()
+        //}
 
-        let suggestions: any[]
-        if (options.multiEntryAssocField) {
-            const records = await coll.toArray()
-            suggestions = records.map(
-                (record) => record[options.multiEntryAssocField],
-            )
-        } else {
-            suggestions = await coll.uniqueKeys()
-        }
+        //let suggestions: any[]
+        //if (options.multiEntryAssocField) {
+        //const records = await coll.toArray()
+        //suggestions = records.map(
+        //(record) => record[options.multiEntryAssocField],
+        //)
+        //} else {
+        //suggestions = await coll.uniqueKeys()
+        //}
 
-        const pks = options.includePks ? await coll.primaryKeys() : []
+        //const pks = options.includePks ? await coll.primaryKeys() : []
 
-        return suggestions.map((suggestion: S, i) => ({
-            suggestion,
-            collection,
-            pk: pks[i],
-        })) as SuggestResult<S, P>
+        //return suggestions.map((suggestion: S, i) => ({
+        //suggestion,
+        //collection,
+        //pk: pks[i],
+        //})) as SuggestResult<S, P>
     }
 
     // Used to provide initial suggestions for tags that are not associated with the list.
@@ -134,27 +137,28 @@ export class SuggestPlugin extends StorageBackendPlugin<Neo4jBackend> {
         type: SuggestType
         limit?: number
     }) {
-        const db = this.backend.dexieInstance
-        const applyQuery = (where) =>
-            where
-                .noneOf(notInclude)
-                .limit(limit)
-                .uniqueKeys()
-                .catch(initErrHandler([]))
+        return []
+        //        const db = this.backend.dexieInstance
+        //const applyQuery = (where) =>
+        //where
+        //.noneOf(notInclude)
+        //.limit(limit)
+        //.uniqueKeys()
+        //.catch(initErrHandler([]))
 
-        switch (type) {
-            case 'domain': {
-                const domains = await applyQuery(
-                    db.table('pages').where('domain'),
-                )
-                const hostnames = await applyQuery(
-                    db.table('pages').where('hostname'),
-                )
-                return [...new Set([...domains, ...hostnames])]
-            }
-            case 'tag':
-            default:
-                return applyQuery(db.table('tags').where('name'))
-        }
+        //switch (type) {
+        //case 'domain': {
+        //const domains = await applyQuery(
+        //db.table('pages').where('domain'),
+        //)
+        //const hostnames = await applyQuery(
+        //db.table('pages').where('hostname'),
+        //)
+        //return [...new Set([...domains, ...hostnames])]
+        //}
+        //case 'tag':
+        //default:
+        //return applyQuery(db.table('tags').where('name'))
+        //}
     }
 }

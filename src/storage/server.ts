@@ -15,6 +15,7 @@ import { ServerStorage } from './types'
 let shouldLogOperations = false
 
 export function createServerStorageManager() {
+    console.log()
     const firebase = getFirebase()
     const serverStorageBackend = new FirestoreStorageBackend({
         firebase: firebase as any,
@@ -42,6 +43,7 @@ export function createLazyServerStorage(
         sharedSyncLog?: SharedSyncLogStorage
     },
 ) {
+    console.log()
     let serverStoragePromise: Promise<ServerStorage>
 
     try {
@@ -51,6 +53,7 @@ export function createLazyServerStorage(
 
     return async () => {
         if (serverStoragePromise) {
+            console.log('promise already initialized')
             return serverStoragePromise
         }
 
@@ -92,6 +95,7 @@ export function createLazyServerStorage(
 }
 
 export function createLazyMemoryServerStorage() {
+    console.log()
     return createLazyServerStorage(
         () => {
             const backend = new DexieStorageBackend({

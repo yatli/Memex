@@ -47,32 +47,33 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         pageMap: Map<string, Page>,
         base64Img?: boolean,
     ) {
-        const pages = await this.backend.dexieInstance
-            .table('pages')
-            .where('url')
-            .anyOf(pageUrls)
-            .limit(pageUrls.length)
-            .toArray()
+        return []
+        //        const pages = await this.backend.dexieInstance
+        //.table('pages')
+        //.where('url')
+        //.anyOf(pageUrls)
+        //.limit(pageUrls.length)
+        //.toArray()
 
-        const bookmarks = new Set<string>()
-        await this.backend.dexieInstance
-            .table('bookmarks')
-            .where('url')
-            .anyOf(pageUrls)
-            .limit(pageUrls.length)
-            .each((bm) => bookmarks.add(bm.url))
+        //const bookmarks = new Set<string>()
+        //await this.backend.dexieInstance
+        //.table('bookmarks')
+        //.where('url')
+        //.anyOf(pageUrls)
+        //.limit(pageUrls.length)
+        //.each((bm) => bookmarks.add(bm.url))
 
-        for (const page of pages) {
-            const screenshot = page.screenshot
-                ? await this.encodeImage(page.screenshot, base64Img)
-                : undefined
+        //for (const page of pages) {
+        //const screenshot = page.screenshot
+        //? await this.encodeImage(page.screenshot, base64Img)
+        //: undefined
 
-            pageMap.set(page.url, {
-                ...page,
-                screenshot,
-                hasBookmark: bookmarks.has(page.url),
-            })
-        }
+        //pageMap.set(page.url, {
+        //...page,
+        //screenshot,
+        //hasBookmark: bookmarks.has(page.url),
+        //})
+        //}
     }
 
     private async lookupFavIcons(
@@ -80,17 +81,19 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         favIconMap: Map<string, string>,
         base64Img?: boolean,
     ) {
-        // Find all assoc. fav-icons and create object URLs pointing to the Blobs
-        const favIcons = await this.backend.dexieInstance
-            .table('favIcons')
-            .where('hostname')
-            .anyOf(hostnames)
-            .limit(hostnames.length)
-            .toArray()
+        // TODO neo4j
+        return
+        //        // Find all assoc. fav-icons and create object URLs pointing to the Blobs
+        //const favIcons = await this.backend.dexieInstance
+        //.table('favIcons')
+        //.where('hostname')
+        //.anyOf(hostnames)
+        //.limit(hostnames.length)
+        //.toArray()
 
-        for (const { favIcon, hostname } of favIcons) {
-            favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
-        }
+        //for (const { favIcon, hostname } of favIcons) {
+        //favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
+        //}
     }
 
     private async lookupUsers(
@@ -98,49 +101,51 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         userMap: Map<number, User>,
         base64Img?: boolean,
     ) {
-        const users = await this.backend.dexieInstance
-            .table(USERS_COLL)
-            .where('id')
-            .anyOf(userIds)
-            .limit(userIds.length)
-            .toArray()
+        return []
+        //        const users = await this.backend.dexieInstance
+        //.table(USERS_COLL)
+        //.where('id')
+        //.anyOf(userIds)
+        //.limit(userIds.length)
+        //.toArray()
 
-        for (const user of users) {
-            const profilePic = user.profilePic
-                ? await this.encodeImage(user.profilePic, base64Img)
-                : undefined
+        //for (const user of users) {
+        //const profilePic = user.profilePic
+        //? await this.encodeImage(user.profilePic, base64Img)
+        //: undefined
 
-            userMap.set(user.id, {
-                ...user,
-                profilePic,
-            })
-        }
+        //userMap.set(user.id, {
+        //...user,
+        //profilePic,
+        //})
+        //}
     }
 
     private async lookupLists(
         pageUrls: string[],
         listMap: Map<string, string[]>,
     ) {
-        const listEntries = (await this.backend.dexieInstance
-            .table('pageListEntries')
-            .where('pageUrl')
-            .anyOf(pageUrls)
-            .primaryKeys()) as Array<[number, string]>
+        return []
+        //        const listEntries = (await this.backend.dexieInstance
+        //.table('pageListEntries')
+        //.where('pageUrl')
+        //.anyOf(pageUrls)
+        //.primaryKeys()) as Array<[number, string]>
 
-        const listIds = new Set(listEntries.map(([listId]) => listId))
-        const nameLookupById = new Map<number, string>()
+        //const listIds = new Set(listEntries.map(([listId]) => listId))
+        //const nameLookupById = new Map<number, string>()
 
-        await this.backend.dexieInstance
-            .table('customLists')
-            .where('id')
-            .anyOf([...listIds])
-            .each(({ id, name }) => nameLookupById.set(id, name))
+        //await this.backend.dexieInstance
+        //.table('customLists')
+        //.where('id')
+        //.anyOf([...listIds])
+        //.each(({ id, name }) => nameLookupById.set(id, name))
 
-        for (const [listId, url] of listEntries) {
-            const current = listMap.get(url) ?? []
-            const listName = nameLookupById.get(listId)
-            listMap.set(url, [...current, listName])
-        }
+        //for (const [listId, url] of listEntries) {
+        //const current = listMap.get(url) ?? []
+        //const listName = nameLookupById.get(listId)
+        //listMap.set(url, [...current, listName])
+        //}
     }
 
     private async lookupTags(
@@ -148,41 +153,43 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         tagMap: Map<number | string, string[]>,
         isSocialSearch?: boolean,
     ) {
-        const tags = await this.backend.dexieInstance
-            .table('tags')
-            .where('url')
-            .anyOf(pageUrls)
-            .primaryKeys()
+        return []
+        //        const tags = await this.backend.dexieInstance
+        //.table('tags')
+        //.where('url')
+        //.anyOf(pageUrls)
+        //.primaryKeys()
 
-        tags.forEach((pk) => {
-            const [name, url] = pk as [string, string]
-            let key: number | string
+        //tags.forEach((pk) => {
+        //const [name, url] = pk as [string, string]
+        //let key: number | string
 
-            if (isSocialSearch) {
-                const { postId } = derivePostUrlIdProps({ url })
-                key = postId
-            } else {
-                key = url
-            }
+        //if (isSocialSearch) {
+        //const { postId } = derivePostUrlIdProps({ url })
+        //key = postId
+        //} else {
+        //key = url
+        //}
 
-            const current = tagMap.get(key) || []
-            tagMap.set(key, [...current, name])
-        })
+        //const current = tagMap.get(key) || []
+        //tagMap.set(key, [...current, name])
+        //})
     }
 
     private async lookupSocialBookmarks(
         postIds: number[],
         socialMap: Map<number, SocialPage>,
     ) {
-        return this.backend.dexieInstance
-            .table(BMS_COLL)
-            .where('postId')
-            .anyOf(postIds)
-            .limit(postIds.length)
-            .each(({ postId }) => {
-                const page = socialMap.get(postId)
-                socialMap.set(postId, { ...page, hasBookmark: true })
-            })
+        return []
+        //        return this.backend.dexieInstance
+        //.table(BMS_COLL)
+        //.where('postId')
+        //.anyOf(postIds)
+        //.limit(postIds.length)
+        //.each(({ postId }) => {
+        //const page = socialMap.get(postId)
+        //socialMap.set(postId, { ...page, hasBookmark: true })
+        //})
     }
 
     private async lookupAnnotsCounts(
@@ -190,25 +197,26 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         countMap: Map<number | string, number>,
         isSocialSearch?: boolean,
     ) {
-        const annotUrls = (await this.backend.dexieInstance
-            .table('annotations')
-            .where('pageUrl')
-            .anyOf(pageUrls)
-            .keys()) as string[]
+        return []
+        //        const annotUrls = (await this.backend.dexieInstance
+        //.table('annotations')
+        //.where('pageUrl')
+        //.anyOf(pageUrls)
+        //.keys()) as string[]
 
-        annotUrls.forEach((url) => {
-            let key: number | string
+        //annotUrls.forEach((url) => {
+        //let key: number | string
 
-            if (isSocialSearch) {
-                const { postId } = derivePostUrlIdProps({ url })
-                key = postId
-            } else {
-                key = url
-            }
+        //if (isSocialSearch) {
+        //const { postId } = derivePostUrlIdProps({ url })
+        //key = postId
+        //} else {
+        //key = url
+        //}
 
-            const count = countMap.get(key) || 0
-            countMap.set(key, count + 1)
-        })
+        //const count = countMap.get(key) || 0
+        //countMap.set(key, count + 1)
+        //})
     }
 
     private async lookupLatestTimes(
@@ -217,49 +225,50 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<Neo4jBackend> {
         pageMap: Map<string, Page>,
         upperTimeBound: number,
     ) {
-        const visitQueryP = this.backend.dexieInstance
-            .table('visits')
-            .where('url')
-            .anyOf(pageUrls)
-            .primaryKeys()
-        const bmQueryP = this.backend.dexieInstance
-            .table('bookmarks')
-            .where('url')
-            .anyOf(pageUrls)
-            .limit(pageUrls.length)
-            .toArray()
+        return
+        //        const visitQueryP = this.backend.dexieInstance
+        //.table('visits')
+        //.where('url')
+        //.anyOf(pageUrls)
+        //.primaryKeys()
+        //const bmQueryP = this.backend.dexieInstance
+        //.table('bookmarks')
+        //.where('url')
+        //.anyOf(pageUrls)
+        //.limit(pageUrls.length)
+        //.toArray()
 
-        const [visits, bms] = await Promise.all([visitQueryP, bmQueryP])
+        //const [visits, bms] = await Promise.all([visitQueryP, bmQueryP])
 
-        const visitMap = new Map<string, number>()
-        for (const [time, url] of visits) {
-            if (upperTimeBound && time > upperTimeBound) {
-                continue
-            }
+        //const visitMap = new Map<string, number>()
+        //for (const [time, url] of visits) {
+        //if (upperTimeBound && time > upperTimeBound) {
+        //continue
+        //}
 
-            // For urls with lots of visits, IDB sorts them latest last
-            visitMap.set(url, time)
-        }
+        //// For urls with lots of visits, IDB sorts them latest last
+        //visitMap.set(url, time)
+        //}
 
-        const bookmarkMap = new Map<string, number>()
-        for (const { time, url } of bms) {
-            const page = pageMap.get(url)
-            pageMap.set(url, { ...page, hasBookmark: true } as any)
+        //const bookmarkMap = new Map<string, number>()
+        //for (const { time, url } of bms) {
+        //const page = pageMap.get(url)
+        //pageMap.set(url, { ...page, hasBookmark: true } as any)
 
-            if (upperTimeBound && time > upperTimeBound) {
-                continue
-            }
+        //if (upperTimeBound && time > upperTimeBound) {
+        //continue
+        //}
 
-            bookmarkMap.set(url, time)
-        }
+        //bookmarkMap.set(url, time)
+        //}
 
-        for (const url of pageUrls) {
-            const visit = visitMap.get(url)
-            const bm = bookmarkMap.get(url)
+        //for (const url of pageUrls) {
+        //const visit = visitMap.get(url)
+        //const bm = bookmarkMap.get(url)
 
-            const max = !bm || bm < visit ? visit : bm
-            timeMap.set(url, max)
-        }
+        //const max = !bm || bm < visit ? visit : bm
+        //timeMap.set(url, max)
+        //}
     }
 
     /**

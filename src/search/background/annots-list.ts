@@ -37,129 +37,133 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
         endDate,
         startDate,
     }: Partial<AnnotSearchParams>) => {
-        if (!url) {
-            throw new Error('URL must be supplied to list annotations.')
-        }
+        return []
+        //        if (!url) {
+        //throw new Error('URL must be supplied to list annotations.')
+        //}
 
-        const coll = this.backend.dexieInstance
-            .table<Annotation, string>(AnnotsStorage.ANNOTS_COLL)
-            .where('pageUrl')
-            .equals(url)
+        //const coll = this.backend.dexieInstance
+        //.table<Annotation, string>(AnnotsStorage.ANNOTS_COLL)
+        //.where('pageUrl')
+        //.equals(url)
 
-        if (!startDate && !endDate) {
-            return coll
-        }
-        // Set defaults
-        startDate = startDate || 0
-        endDate = endDate || Date.now()
+        //if (!startDate && !endDate) {
+        //return coll
+        //}
+        //// Set defaults
+        //startDate = startDate || 0
+        //endDate = endDate || Date.now()
 
-        // Ensure ms extracted from any Date instances
-        startDate = startDate instanceof Date ? startDate.getTime() : startDate
-        endDate = endDate instanceof Date ? endDate.getTime() : endDate
+        //// Ensure ms extracted from any Date instances
+        //startDate = startDate instanceof Date ? startDate.getTime() : startDate
+        //endDate = endDate instanceof Date ? endDate.getTime() : endDate
 
-        return coll.filter(({ lastEdited }) => {
-            const time = lastEdited.getTime()
-            return time >= startDate && time <= endDate
-        })
+        //return coll.filter(({ lastEdited }) => {
+        //const time = lastEdited.getTime()
+        //return time >= startDate && time <= endDate
+        //})
     }
 
     private async filterByBookmarks(urls: string[]) {
-        return this.backend.dexieInstance
-            .table<any, string>(AnnotsStorage.BMS_COLL)
-            .where('url')
-            .anyOf(urls)
-            .primaryKeys()
+        return []
+        //        return this.backend.dexieInstance
+        //.table<any, string>(AnnotsStorage.BMS_COLL)
+        //.where('url')
+        //.anyOf(urls)
+        //.primaryKeys()
     }
 
     private async filterByTags(urls: string[], params: AnnotSearchParams) {
-        const tagsExc =
-            params.tagsExc && params.tagsExc.length
-                ? new Set(params.tagsExc)
-                : null
-        const tagsInc =
-            params.tagsInc && params.tagsInc.length
-                ? new Set(params.tagsInc)
-                : null
+        return []
+        //        const tagsExc =
+        //params.tagsExc && params.tagsExc.length
+        //? new Set(params.tagsExc)
+        //: null
+        //const tagsInc =
+        //params.tagsInc && params.tagsInc.length
+        //? new Set(params.tagsInc)
+        //: null
 
-        let tagsForUrls = new Map<string, string[]>()
+        //let tagsForUrls = new Map<string, string[]>()
 
-        await this.backend.dexieInstance
-            .table<any, [string, string]>(AnnotsStorage.TAGS_COLL)
-            .where('url')
-            .anyOf(urls)
-            .eachPrimaryKey(([tag, url]) => {
-                const curr = tagsForUrls.get(url) || []
-                tagsForUrls.set(url, [...curr, tag])
-            })
+        //await this.backend.dexieInstance
+        //.table<any, [string, string]>(AnnotsStorage.TAGS_COLL)
+        //.where('url')
+        //.anyOf(urls)
+        //.eachPrimaryKey(([tag, url]) => {
+        //const curr = tagsForUrls.get(url) || []
+        //tagsForUrls.set(url, [...curr, tag])
+        //})
 
-        if (tagsExc) {
-            tagsForUrls = new Map(
-                [...tagsForUrls].filter(([, tags]) =>
-                    tags.some((tag) => !tagsExc.has(tag)),
-                ),
-            )
-        }
+        //if (tagsExc) {
+        //tagsForUrls = new Map(
+        //[...tagsForUrls].filter(([, tags]) =>
+        //tags.some((tag) => !tagsExc.has(tag)),
+        //),
+        //)
+        //}
 
-        if (tagsInc) {
-            tagsForUrls = new Map(
-                [...tagsForUrls].filter(([, tags]) =>
-                    tags.some((tag) => tagsInc.has(tag)),
-                ),
-            )
-        }
+        //if (tagsInc) {
+        //tagsForUrls = new Map(
+        //[...tagsForUrls].filter(([, tags]) =>
+        //tags.some((tag) => tagsInc.has(tag)),
+        //),
+        //)
+        //}
 
-        return urls.filter((url) => {
-            if (!tagsInc) {
-                // Make sure current url doesn't have any excluded tag
-                const urlTags = tagsForUrls.get(url) || []
-                return urlTags.some((tag) => !tagsExc.has(tag))
-            }
+        //return urls.filter((url) => {
+        //if (!tagsInc) {
+        //// Make sure current url doesn't have any excluded tag
+        //const urlTags = tagsForUrls.get(url) || []
+        //return urlTags.some((tag) => !tagsExc.has(tag))
+        //}
 
-            return tagsForUrls.has(url)
-        })
+        //return tagsForUrls.has(url)
+        //})
     }
 
     private async filterByCollections(
         urls: string[],
         params: AnnotSearchParams,
     ) {
-        const ids = params.collections.map((id) => Number(id))
+        return []
+        //        const ids = params.collections.map((id) => Number(id))
 
-        const pageEntries = await this.backend.dexieInstance
-            .table('pageListEntries')
-            .where('listId')
-            .anyOf(ids)
-            .primaryKeys()
+        //const pageEntries = await this.backend.dexieInstance
+        //.table('pageListEntries')
+        //.where('listId')
+        //.anyOf(ids)
+        //.primaryKeys()
 
-        const pageUrls = new Set(pageEntries.map((pk) => pk[1]))
+        //const pageUrls = new Set(pageEntries.map((pk) => pk[1]))
 
-        return this.backend.dexieInstance
-            .table(AnnotsStorage.ANNOTS_COLL)
-            .where('url')
-            .anyOf(urls)
-            .and((annot) => pageUrls.has(annot.pageUrl))
-            .primaryKeys() as Promise<string[]>
+        //return this.backend.dexieInstance
+        //.table(AnnotsStorage.ANNOTS_COLL)
+        //.where('url')
+        //.anyOf(urls)
+        //.and((annot) => pageUrls.has(annot.pageUrl))
+        //.primaryKeys() as Promise<string[]>
 
-        // IMPLEMENTATION FOR ANNOTS COLLECTIONS
-        // const [listIds, entries] = await Promise.all([
-        //     this.backend.dexieInstance
-        //         .table<any, number>(AnnotsStorage.LISTS_COLL)
-        //         .where('name')
-        //         .anyOf(params.collections)
-        //         .primaryKeys(),
-        //     this.backend.dexieInstance
-        //         .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
-        //         .where('url')
-        //         .anyOf(urls)
-        //         .primaryKeys(),
-        // ])
+        //// IMPLEMENTATION FOR ANNOTS COLLECTIONS
+        //// const [listIds, entries] = await Promise.all([
+        ////     this.backend.dexieInstance
+        ////         .table<any, number>(AnnotsStorage.LISTS_COLL)
+        ////         .where('name')
+        ////         .anyOf(params.collections)
+        ////         .primaryKeys(),
+        ////     this.backend.dexieInstance
+        ////         .table<any, [number, string]>(AnnotsStorage.LIST_ENTRIES_COLL)
+        ////         .where('url')
+        ////         .anyOf(urls)
+        ////         .primaryKeys(),
+        //// ])
 
-        // const lists = new Set(listIds)
-        // const entryUrls = new Set(
-        //     entries
-        //         .filter(([listId]) => lists.has(listId))
-        //         .map(([, url]) => url),
-        // ))
+        //// const lists = new Set(listIds)
+        //// const entryUrls = new Set(
+        ////     entries
+        ////         .filter(([listId]) => lists.has(listId))
+        ////         .map(([, url]) => url),
+        //// ))
     }
 
     private async filterByDomains(
@@ -181,16 +185,17 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
     }
 
     private async mapUrlsToAnnots(urls: string[]): Promise<Annotation[]> {
-        const annotUrlMap = new Map<string, Annotation>()
+        return []
+        //        const annotUrlMap = new Map<string, Annotation>()
 
-        await this.backend.dexieInstance
-            .table(AnnotsStorage.ANNOTS_COLL)
-            .where('url')
-            .anyOf(urls)
-            .each((annot) => annotUrlMap.set(annot.url, annot))
+        //await this.backend.dexieInstance
+        //.table(AnnotsStorage.ANNOTS_COLL)
+        //.where('url')
+        //.anyOf(urls)
+        //.each((annot) => annotUrlMap.set(annot.url, annot))
 
-        // Ensure original order of input is kept
-        return urls.map((url) => annotUrlMap.get(url))
+        //// Ensure original order of input is kept
+        //return urls.map((url) => annotUrlMap.get(url))
     }
 
     private async filterResults(results: string[], params: AnnotSearchParams) {
@@ -220,19 +225,20 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
     }
 
     private async calcHardLowerTimeBound({ startDate }: AnnotSearchParams) {
-        const earliestAnnot: Annotation = await this.backend.dexieInstance
-            .table(AnnotsStorage.ANNOTS_COLL)
-            .orderBy('lastEdited')
-            .first()
+        return []
+        //        const earliestAnnot: Annotation = await this.backend.dexieInstance
+        //.table(AnnotsStorage.ANNOTS_COLL)
+        //.orderBy('lastEdited')
+        //.first()
 
-        if (
-            earliestAnnot &&
-            moment(earliestAnnot.lastEdited).isAfter(startDate || 0)
-        ) {
-            return moment(earliestAnnot.lastEdited)
-        }
+        //if (
+        //earliestAnnot &&
+        //moment(earliestAnnot.lastEdited).isAfter(startDate || 0)
+        //) {
+        //return moment(earliestAnnot.lastEdited)
+        //}
 
-        return startDate ? moment(new Date(startDate)) : moment('2018-06-01') // The date annots feature was released
+        //return startDate ? moment(new Date(startDate)) : moment('2018-06-01') // The date annots feature was released
     }
 
     private mergeResults(
@@ -287,13 +293,14 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
     }
 
     private async queryAnnotsByDay(startDate: Date, endDate: Date) {
-        const collection = this.backend.dexieInstance
-            .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
-            .where('lastEdited')
-            .between(startDate, endDate, true, true)
-            .reverse()
+        return []
+        //        const collection = this.backend.dexieInstance
+        //.table<Annotation>(AnnotsStorage.ANNOTS_COLL)
+        //.where('lastEdited')
+        //.between(startDate, endDate, true, true)
+        //.reverse()
 
-        return collection.toArray()
+        //return collection.toArray()
     }
 
     private async queryTermsField(
@@ -303,20 +310,21 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
         },
         { startDate, endDate }: AnnotSearchParams,
     ): Promise<string[]> {
-        let coll = this.backend.dexieInstance
-            .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
-            .where(args.field)
-            .equals(args.term)
+        return []
+        //        let coll = this.backend.dexieInstance
+        //.table<Annotation>(AnnotsStorage.ANNOTS_COLL)
+        //.where(args.field)
+        //.equals(args.term)
 
-        if (startDate || endDate) {
-            coll = coll.filter(
-                (annot) =>
-                    annot.lastEdited >= new Date(startDate || 0) &&
-                    annot.lastEdited <= new Date(endDate || Date.now()),
-            )
-        }
+        //if (startDate || endDate) {
+        //coll = coll.filter(
+        //(annot) =>
+        //annot.lastEdited >= new Date(startDate || 0) &&
+        //annot.lastEdited <= new Date(endDate || Date.now()),
+        //)
+        //}
 
-        return coll.primaryKeys() as Promise<string[]>
+        //return coll.primaryKeys() as Promise<string[]>
     }
 
     private async lookupTerms({
@@ -471,13 +479,14 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<Neo4jBackend> {
         let continueLookup: boolean
 
         do {
+            // TODO neo4j
             // The results found in this iteration
             let innerResults: string[] = []
 
-            innerResults = await this.listWithUrl(params)
-                .offset(innerSkip)
-                .limit(innerLimit)
-                .primaryKeys()
+            //innerResults = await this.listWithUrl(params)
+            //.offset(innerSkip)
+            //.limit(innerLimit)
+            //.primaryKeys()
 
             continueLookup = innerResults.length >= innerLimit
 

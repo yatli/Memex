@@ -53,12 +53,14 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<Neo4jBackend> {
      * NOTE: This is SUPER innefficient.
      */
     private queryByRegexp({ collection, fieldName, pattern }: RegexpQueryArgs) {
+        return new Array<number>()
+
         const re =
             typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern
-
-        return this.backend.dexieInstance
-            .table(collection)
-            .filter((doc) => re.test(doc[fieldName]))
+        // TODO neo4j
+        //return this.backend.dexieInstance
+        //.table(collection)
+        //.filter((doc) => re.test(doc[fieldName]))
     }
 
     getPks = ({
@@ -69,78 +71,78 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<Neo4jBackend> {
         filter,
         reverse,
     }: GetPksProps) => {
-        const table = this.backend.dexieInstance.table(collection)
-        let coll
+        return new Set<number>()
+        //const table = this.backend.dexieInstance.table(collection)
+        //let coll
 
-        switch (opName) {
-            case 'anyOf':
-                coll = table.where(fieldName).anyOf(opValue)
-                break
-            case 'equals':
-                coll = table.where(fieldName).equals(opValue)
-                break
-            default:
-                coll = table.toCollection()
-        }
+        //switch (opName) {
+        //case 'anyOf':
+        //coll = table.where(fieldName).anyOf(opValue)
+        //break
+        //case 'equals':
+        //coll = table.where(fieldName).equals(opValue)
+        //break
+        //default:
+        //coll = table.toCollection()
+        //}
 
-        if (filter) {
-            coll = coll.filter(filter)
-        }
+        //if (filter) {
+        //coll = coll.filter(filter)
+        //}
 
-        if (reverse) {
-            coll = coll.reverse()
-        }
+        //if (reverse) {
+        //coll = coll.reverse()
+        //}
 
-        return coll.primaryKeys()
+        //return coll.primaryKeys()
     }
 
     async deleteByRegexp(args: RegexpQueryArgs) {
-        const pageUrls = await this.queryByRegexp(args).primaryKeys()
+        return new Set<number>()
+        //        const pageUrls = await this.queryByRegexp(args).primaryKeys()
 
-        await this.backend.executeBatch([
-            {
-                collection: 'pages',
-                operation: 'deleteObjects',
-                where: { url: { $in: pageUrls } },
-            },
-            {
-                collection: 'visits',
-                operation: 'deleteObjects',
-                where: { url: { $in: pageUrls } },
-            },
-            {
-                collection: 'bookmarks',
-                operation: 'deleteObjects',
-                where: { url: { $in: pageUrls } },
-            },
-            {
-                collection: 'tags',
-                operation: 'deleteObjects',
-                where: { url: { $in: pageUrls } },
-            },
-            {
-                collection: 'pageListEntries',
-                operation: 'deleteObjects',
-                where: { pageUrl: { $in: pageUrls } },
-            },
-            {
-                collection: 'annotations',
-                operation: 'deleteObjects',
-                where: { pageUrl: { $in: pageUrls } },
-            },
-        ])
+        //await this.backend.executeBatch([
+        //{
+        //collection: 'pages',
+        //operation: 'deleteObjects',
+        //where: { url: { $in: pageUrls } },
+        //},
+        //{
+        //collection: 'visits',
+        //operation: 'deleteObjects',
+        //where: { url: { $in: pageUrls } },
+        //},
+        //{
+        //collection: 'bookmarks',
+        //operation: 'deleteObjects',
+        //where: { url: { $in: pageUrls } },
+        //},
+        //{
+        //collection: 'tags',
+        //operation: 'deleteObjects',
+        //where: { url: { $in: pageUrls } },
+        //},
+        //{
+        //collection: 'pageListEntries',
+        //operation: 'deleteObjects',
+        //where: { pageUrl: { $in: pageUrls } },
+        //},
+        //{
+        //collection: 'annotations',
+        //operation: 'deleteObjects',
+        //where: { pageUrl: { $in: pageUrls } },
+        //},
+        //])
     }
 
-    countByRegexp = (args: RegexpQueryArgs) => this.queryByRegexp(args).count()
+    countByRegexp = (args: RegexpQueryArgs) => this.queryByRegexp(args).length
 
     /**
      * NOTE: Super dangerous; deletes all data
      */
-    recreateDatabase = async () => {
-        await this.backend.dexieInstance.delete()
-        await this.backend.dexieInstance.open()
-    }
+    recreateDatabase = async () => await this.backend.recreateDatabase()
 
     findByPk = <T = any>({ collection, pk }: { collection: string; pk: any }) =>
-        this.backend.dexieInstance.table<T>(collection).get(pk)
+        // this.backend.dexieInstance.table<T>(collection).get(pk)
+        []
 }
